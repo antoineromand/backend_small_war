@@ -10,8 +10,8 @@ import { Game } from './Game.entity';
 import { PlayerStatistic } from './PlayerStatistic.entity';
 @Entity()
 export class Player {
-  @PrimaryGeneratedColumn()
-  player_id: number;
+  @PrimaryGeneratedColumn('uuid')
+  player_id: string;
 
   @ManyToMany(() => Game)
   games: Game[];
