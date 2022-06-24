@@ -2,39 +2,22 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from 'src/Model/Player.entity';
 import { PlayerStatistic } from 'src/Model/PlayerStatistic.entity';
-import { DeepPartial, InsertResult, ObjectLiteral, Repository } from 'typeorm';
-import { LoginDTO } from './dto/Login.dto';
+import { ObjectLiteral, Repository } from 'typeorm';
 import { RegisterDTO } from './dto/Register.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class LoginService {
+export class PlayerService {
   constructor(
     @InjectRepository(Player) private playerRepository: Repository<Player>,
     @InjectRepository(PlayerStatistic)
     private playerStatisticsRepository: Repository<PlayerStatistic>,
   ) {}
 
-  async login(userLoginInfo: LoginDTO): Promise<Player> {
-    const user = await this.playerRepository.findOne({
-      where: { username: userLoginInfo.username },
+  async findPlayerByUsername(username_player: string): Promise<Player> {
+    return this.playerRepository.findOne({
+      where: { username: username_player },
     });
-    if (user === undefined || user === null) {
-      throw new HttpException('Pseudo incorrecte !', HttpStatus.BAD_REQUEST);
-    } else {
-      const isPasswordMatching = await bcrypt.compare(
-        userLoginInfo.password,
-        user.password,
-      );
-      if (!isPasswordMatching) {
-        throw new HttpException(
-          'Mauvais mot de passe !',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      user.password = undefined;
-      return user;
-    }
   }
 
   async register(user: RegisterDTO): Promise<ObjectLiteral> {
