@@ -20,7 +20,7 @@ export class PlayerService {
     });
   }
 
-  async register(user: RegisterDTO): Promise<ObjectLiteral> {
+  async register(user: RegisterDTO): Promise<Player> {
     const userExist = await this.playerRepository.findOne({
       where: { username: user.username },
     });
@@ -28,7 +28,6 @@ export class PlayerService {
       where: { email: user.email },
     });
     if (userExist !== null && emailExist !== null) {
-      console.log('ça existe ??');
       throw new HttpException(
         'Pseudo ou email déja choisi !',
         HttpStatus.BAD_REQUEST,
@@ -49,7 +48,11 @@ export class PlayerService {
           statistic: idStats,
         })
         .execute();
-      return newUser.generatedMaps[0];
+      const registeredUser = await this.playerRepository.findOne({
+        where: { username: user.username },
+      });
+      registeredUser.password = undefined;
+      return registeredUser;
     }
   }
 
