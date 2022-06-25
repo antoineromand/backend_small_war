@@ -10,6 +10,7 @@ import { TypeormConfigService } from './typeormconfig.service';
   imports: [
     TypeOrmModule.forRootAsync({
       useClass: TypeormConfigService,
+      inject: [TypeormConfigService],
     }),
   ],
   controllers: [],
