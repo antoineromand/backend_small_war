@@ -64,4 +64,45 @@ export class PlayerService {
       .values({})
       .execute();
   }
+
+  async getPlayerInfo(id: string): Promise<Player> {
+    const user = await this.playerRepository.findOne({
+      where: { player_id: id },
+    });
+    user.password = undefined;
+    return user;
+  }
+
+  async updatePlayerUsername(id: string, username: string) {
+    const findUsername = await this.playerRepository.findOne({
+      where: { username: username },
+    });
+    if (findUsername !== null) {
+      throw new HttpException('Pseudo déjà choisi !', HttpStatus.BAD_REQUEST);
+    }
+    const user = await this.getPlayerInfo(id);
+    if (user.username === username) {
+      throw new HttpException(
+        'Le pseudo saisi est le même que votre pseudo actuel !',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const oldUsername = user.username;
+    user.username = username;
+    this.playerRepository.save(user);
+    return `Le joueur ${oldUsername} a changé son pseudo avec le suivant : ${username}`;
+  }
+
+  async updateUserPassword(id: string, password: string) {
+    const user = await this.getPlayerInfo(id);
+    if (user.password === password) {
+      throw new HttpException(
+        'Le mot de passe saisie est le même que votre mot de passe actuel ! Changez le !',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    user.password = await bcrypt.hash(password, 10);
+    this.playerRepository.save(user);
+    return `Le joueur ${user.username} a changé son mot de passe !`;
+  }
 }
