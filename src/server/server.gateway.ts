@@ -24,6 +24,7 @@ export class ServerGateway {
   @SubscribeMessage('search_game')
   login(@MessageBody() data: Player) {
     this.players.push(data);
+    console.log(this.players);
   }
 
   @SubscribeMessage('create_game')
@@ -41,6 +42,7 @@ export class ServerGateway {
         this.playersInGame.push(gameInfos.player, p2);
         const game = await this.gameService.newGame([gameInfos.player, p2]);
         //Je transmet la partie
+        console.log(game);
         this.server.emit('game_start', game);
         //Je génère les positions des bases (à définir avec marin je pense plus précisement)
         const up = posUp(gameInfos.map.width, gameInfos.map.height);
@@ -55,6 +57,7 @@ export class ServerGateway {
           { player: gameInfos.player, position: chosenValue },
           { player: p2, position: otherValue },
         ];
+        console.log(gameData);
         this.server.emit('game_infos', gameData);
       }
     } else {

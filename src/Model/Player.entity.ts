@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Game } from './Game.entity';
 import { PlayerStatistic } from './PlayerStatistic.entity';
+import { ResultGame } from './ResultGame.entity';
 @Entity()
 export class Player {
   @PrimaryGeneratedColumn('uuid')
@@ -29,9 +30,9 @@ export class Player {
   @Column()
   email: string;
 
-  @OneToOne(() => Player)
-  winner: Player;
+  @OneToOne(() => ResultGame)
+  winner: ResultGame;
 
-  @OneToOne(() => Player)
-  looser: Player;
+  @OneToOne(() => ResultGame)
+  looser: ResultGame;
 }
