@@ -24,6 +24,6 @@ export class Game {
   @Column()
   game_start: Date;
 
-  @Column()
+  @Column({ nullable: true })
   game_end: Date;
 }
