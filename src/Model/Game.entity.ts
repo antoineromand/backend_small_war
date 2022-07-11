@@ -11,8 +11,8 @@ import { ResultGame } from './ResultGame.entity';
 
 @Entity()
 export class Game {
-  @PrimaryGeneratedColumn()
-  game_id: number;
+  @PrimaryGeneratedColumn('uuid')
+  game_id: string;
 
   @ManyToMany(() => Player)
   @JoinTable()
