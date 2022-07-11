@@ -68,6 +68,7 @@ export class PlayerService {
   async getPlayerInfo(id: string): Promise<Player> {
     const user = await this.playerRepository.findOne({
       where: { player_id: id },
+      relations: ['statistic'],
     });
     user.password = undefined;
     return user;
