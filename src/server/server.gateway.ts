@@ -8,7 +8,7 @@ import { ServerService } from './server.service';
 import { Server } from 'socket.io';
 import { Player } from 'src/Model/Player.entity';
 import { GameService } from 'src/game/game.service';
-import { isInGame } from 'src/libs/game';
+import { Map } from '../libs/Map';
 
 @WebSocketGateway()
 export class ServerGateway {
@@ -21,20 +21,28 @@ export class ServerGateway {
   server: Server;
   players: Player[] = [];
   playersInGame: Player[] = [];
-  @SubscribeMessage('search_game')
-  login(@MessageBody() data: Player) {
+
+  @SubscribeMessage('login')
+  handleEvent(
+    @MessageBody() player: Player,
+  ) {
     const isConnected = this.players.find(
-      (player) => player.player_id === data.player_id,
+      (player) => player.player_id === player.player_id,
     );
     if (isConnected === undefined) {
-      this.players.push(data);
+      this.players.push(player);
     } else {
       return null;
     }
   }
 
-  @SubscribeMessage('join_game')
+  handleDisconnect(player: Player) {
+    this.players = this.players.filter((pl) => pl.player_id === player.player_id);
+    if(this.playersInGame.includes(player)) this.playersInGame = this.playersInGame.filter((pl) => pl.player_id === player.player_id);
+  }
+
+  @SubscribeMessage('matchmaking')
   async joining_game(@MessageBody() player: Player) {
-    this.serverService.joinGame(player);
+    this.playersInGame.push(player);
   }
 }

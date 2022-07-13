@@ -6,13 +6,31 @@ export type Map = {
   height: number;
 };
 
+export type Pos = {
+  posX: number;
+  posY: number;
+}
+
 export type GameInfos = {
   player: Player[];
   game: Game;
   map: Map;
+  cards: CardEntity[];
 };
 
-export const isInGame = (player: Player, players: Player[]) => {
+export type ActionPlayer = {
+  player: Player;
+  type: string;
+  card: CardEntity;
+}
+
+export type CardEntity = {
+  name: string;
+  hp: number;
+  pos: Pos;
+}
+
+export const isInGame = (player: Player, players: Player[]): Player => {
   const isConnected = players.find(
     (player) => player.player_id === player.player_id,
   );
