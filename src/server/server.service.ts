@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from 'src/Model/Player.entity';
 import { GameInfos, Map, isInGame } from 'src/libs/game';
 import { Repository } from 'typeorm';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { GameService } from 'src/game/game.service';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ServerService {
@@ -15,7 +16,7 @@ export class ServerService {
 
   server: Server;
 
-  async verifyUserExist(pl: Player) {
+  async userExist(pl: Player) {
     const player = this.playerRepository.findOne({
       where: { player_id: pl.player_id },
     });
@@ -26,38 +27,15 @@ export class ServerService {
       return await player;
     }
   }
-  async joinGame(player: Player) {
-    if (await this.verifyUserExist(player)) {
-      this.server.on('looking_for_player', async (player2: Player) => {
-        const game = await this.gameService.newGame([player, player2]);
-        this.server.on('map', (map: Map) => {
-          const infos: GameInfos = {
-            player: [player, player2],
-            map: map,
-            game: game,
-          };
-          return infos;
-        });
-      });
-    }
-  }
 
-  async createGame(player: Player, players: Player[]) {
-    if ((await this.verifyUserExist(player)) !== null) {
-      this.server.on('looking_for_game', async (player2: Player) => {
-        if (player2 === undefined) this.createGame(player, players);
-        if (isInGame(player2, players)) this.createGame(player, players);
-        const game = await this.gameService.newGame([player, player2]);
-        this.server.on('map', (map: Map) => {
-          const infos: GameInfos = {
-            player: [player, player2],
-            map: map,
-            game: game,
-          };
-          return infos;
-        });
-      });
+  async searchGame(player: Player, rooms: any[], socket: Socket) {
+    if(rooms.length === 0) {
+      const idRoom = randomUUID();
+      socket.join(idRoom);
+    } else  {
+      let room = rooms[Math.floor(Math.random() * rooms.length)];
+      room.player === 1 ? socket.join(room.id) :  this.searchGame(player, rooms, socket);     
     }
-    return null;
   }
+  
 }
