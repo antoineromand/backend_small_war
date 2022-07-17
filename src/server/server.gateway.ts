@@ -9,6 +9,7 @@ import { Server } from 'socket.io';
 import { Player } from 'src/Model/Player.entity';
 import { GameService } from 'src/game/game.service';
 import { Map } from '../libs/Map';
+import { InfoServer } from 'src/libs/InfoServer';
 
 @WebSocketGateway()
 export class ServerGateway {
@@ -20,29 +21,39 @@ export class ServerGateway {
   @WebSocketServer()
   server: Server;
   players: Player[] = [];
-  playersInGame: Player[] = [];
+  matchmaking_players: Player[] = [];
+  rooms: any[] = [];
 
   @SubscribeMessage('login')
-  handleEvent(
-    @MessageBody() player: Player,
-  ) {
+  handleEvent(@MessageBody() player: Player): InfoServer {
     const isConnected = this.players.find(
       (player) => player.player_id === player.player_id,
     );
     if (isConnected === undefined) {
       this.players.push(player);
+      const infoServer = new InfoServer(
+        true,
+        'You have been logged succefully !',
+      );
+      return infoServer;
     } else {
-      return null;
+      return new InfoServer(false, 'Error, you have not the permission !');
     }
   }
 
   handleDisconnect(player: Player) {
-    this.players = this.players.filter((pl) => pl.player_id === player.player_id);
-    if(this.playersInGame.includes(player)) this.playersInGame = this.playersInGame.filter((pl) => pl.player_id === player.player_id);
+    this.players = this.players.filter(
+      (pl) => pl.player_id === player.player_id,
+    );
+    if (this.matchmaking_players.includes(player))
+      this.matchmaking_players = this.matchmaking_players.filter(
+        (pl) => pl.player_id === player.player_id,
+      );
   }
 
   @SubscribeMessage('matchmaking')
   async joining_game(@MessageBody() player: Player) {
-    this.playersInGame.push(player);
+    if (!this.matchmaking_players.includes(player)) return;
+    this.matchmaking_players.push(player);
   }
 }

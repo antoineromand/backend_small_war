@@ -1,25 +1,28 @@
 export class Map {
-    private width: number;
-    private heigth: number;
-    constructor(height: number, width: number) {
-        this.heigth = height;
-        this.width = width;
-    }
+  private width: number;
+  private heigth: number;
+  constructor(height: number, width: number) {
+    this.heigth = height;
+    this.width = width;
+  }
 
-    get mapWidth(): number {
-        return this.width;
-    }
+  public get mapWidth(): number {
+    return this.width;
+  }
 
-    set mapWidth(width: number) {
-        this.width = width;
-    }
+  public set mapWidth(width: number) {
+    this.width = width;
+  }
 
-    get mapHeight(): number {
-        return this.heigth;
-    }
+  public get mapHeight(): number {
+    return this.heigth;
+  }
 
-    set mapHeight(height: number) {
-        this.heigth = height;
-    }
+  public set mapHeight(height: number) {
+    this.heigth = height;
+  }
 
+  public getMap() {
+    return { width: this.mapWidth, height: this.heigth };
+  }
 }
