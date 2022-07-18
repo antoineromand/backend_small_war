@@ -8,7 +8,6 @@ import { ServerService } from './server.service';
 import { Server } from 'socket.io';
 import { Player } from 'src/Model/Player.entity';
 import { GameService } from 'src/game/game.service';
-import { Map } from '../libs/Map';
 import { InfoServer } from 'src/libs/InfoServer';
 
 @WebSocketGateway()
@@ -23,6 +22,11 @@ export class ServerGateway {
   players: Player[] = [];
   matchmaking_players: Player[] = [];
   rooms: any[] = [];
+
+  @SubscribeMessage('admin/players')
+  getPlayersOnLine(): Player[] {
+    return this.players;
+  }
 
   @SubscribeMessage('login')
   handleEvent(@MessageBody() player: Player): InfoServer {

@@ -6,6 +6,7 @@ import { PlayerModule } from './player/player.module';
 import { AuthModule } from './auth/auth.module';
 import { ServerModule } from './server/server.module';
 import { GameModule } from './game/game.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { GameModule } from './game/game.module';
     AuthModule,
     ServerModule,
     GameModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [],
