@@ -13,7 +13,7 @@ export class GameService {
     @InjectRepository(ResultGame)
     private resultGameRepository: Repository<ResultGame>,
   ) {}
-  async newGame(players: Player[]) {
+  async newGame(players: Player[]): Promise<Game> {
     players.forEach(async (element) => {
       const player = await this.playerRepository.findOne({
         where: { username: element.username },
@@ -27,10 +27,10 @@ export class GameService {
     game.game_end = null;
     game.players = players;
     game.result = null;
-    return this.gameRepository.save(game);
+    return await this.gameRepository.save(game);
   }
 
-  async playerResult(player: Player, result: string) {
+  async playerResult(player: Player, result: string): Promise<Player> {
     player.statistic.games++;
     switch (result) {
       case 'win':
@@ -40,10 +40,10 @@ export class GameService {
         player.statistic.loose++;
         break;
     }
-    this.playerRepository.save(player);
+    return await this.playerRepository.save(player);
   }
 
-  async endGame(gameId: string, winner: Player, looser: Player) {
+  async endGame(gameId: string, winner: Player, looser: Player): Promise<Game> {
     const result = new ResultGame();
     const game = await this.gameRepository.findOne({
       where: { game_id: gameId },
@@ -56,6 +56,6 @@ export class GameService {
     this.resultGameRepository.save(result);
     game.result = result;
     game.game_end = new Date();
-    this.gameRepository.save(game);
+    return await this.gameRepository.save(game);
   }
 }
