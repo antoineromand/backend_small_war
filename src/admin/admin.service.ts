@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NOTFOUND } from 'dns';
 import { Game } from 'src/Model/Game.entity';
 import { Player } from 'src/Model/Player.entity';
 import { PlayerStatistic } from 'src/Model/PlayerStatistic.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class AdminService {
@@ -31,5 +32,14 @@ export class AdminService {
         } catch (e) {
             throw new Error(e);
         } 
+    }
+
+    async getGames(online?:string) {
+        if(online === undefined) {
+            return await this.gameRepository.find({relations: ['result', 'players']});
+        } else {
+            return await this.gameRepository.find({relations: ['result', 'players'], where: {game_end: IsNull()}})
+        }
+        
     }
 }

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToOne,
@@ -19,6 +20,7 @@ export class Game {
   players: Player[];
 
   @OneToOne(() => ResultGame)
+  @JoinColumn()
   result: ResultGame;
 
   @Column()
