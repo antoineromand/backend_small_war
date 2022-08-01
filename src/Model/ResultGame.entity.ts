@@ -4,8 +4,8 @@ import { Player } from './Player.entity';
 
 @Entity()
 export class ResultGame {
-  @PrimaryGeneratedColumn()
-  id_result_game: number;
+  @PrimaryGeneratedColumn('uuid')
+  id_result_game: string;
 
   @OneToOne(() => Game)
   @JoinColumn()

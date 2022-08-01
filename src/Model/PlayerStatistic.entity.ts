@@ -3,8 +3,8 @@ import { Player } from './Player.entity';
 
 @Entity()
 export class PlayerStatistic {
-  @PrimaryGeneratedColumn()
-  player_statistic_id: number;
+  @PrimaryGeneratedColumn('uuid')
+  player_statistic_id: string;
 
   @Column({ default: 0 })
   win: number;

@@ -8,7 +8,7 @@ import { ServerService } from './server.service';
 import { Server } from 'socket.io';
 import { Player } from 'src/Model/Player.entity';
 import { GameService } from 'src/game/game.service';
-import { GameInfos, PlayerGameInfos, posDown, posUp } from 'src/libs/player';
+import { InfoServer } from 'src/libs/InfoServer';
 
 @WebSocketGateway()
 export class ServerGateway {
@@ -20,48 +20,44 @@ export class ServerGateway {
   @WebSocketServer()
   server: Server;
   players: Player[] = [];
-  playersInGame: Player[] = [];
-  @SubscribeMessage('search_game')
-  login(@MessageBody() data: Player) {
-    this.players.push(data);
-    console.log(this.players);
+  matchmaking_players: Player[] = [];
+  rooms: any[] = [];
+
+  @SubscribeMessage('admin/players')
+  getPlayersOnLine(): Player[] {
+    return this.players;
   }
 
-  @SubscribeMessage('create_game')
-  async matchmaking(@MessageBody() gameInfos: GameInfos) {
-    if (this.players.length > 1) {
-      let p2: Player =
-        this.players[Math.floor(Math.random() * this.players.length)];
-      if (
-        this.playersInGame.includes(p2) &&
-        this.playersInGame.includes(gameInfos.player)
-      ) {
-        //Si le player2 est déjà dans une game (et également le player 1), relancer la fonction jusqu'à que le player 2 ne soit pas un player dans une game.
-        this.matchmaking(gameInfos);
-      } else {
-        this.playersInGame.push(gameInfos.player, p2);
-        const game = await this.gameService.newGame([gameInfos.player, p2]);
-        //Je transmet la partie
-        console.log(game);
-        this.server.emit('game_start', game);
-        //Je génère les positions des bases (à définir avec marin je pense plus précisement)
-        const up = posUp(gameInfos.map.width, gameInfos.map.height);
-        const down = posDown(gameInfos.map.width, gameInfos.map.height);
-        //Je pcik up ou down à une variable au hasard
-        const chosenValue = Math.random() * 2 ? up : down;
-        let otherValue;
-        //J'attribue à une autre valeur la const qui n'a pas été pick par chosenValue
-        chosenValue === up ? (otherValue = down) : (otherValue = up);
-        //Je transmet les informations de la game qui contiennent les deux joueurs et les position de leurs bases.
-        const gameData: PlayerGameInfos[] = [
-          { player: gameInfos.player, position: chosenValue },
-          { player: p2, position: otherValue },
-        ];
-        console.log(gameData);
-        this.server.emit('game_infos', gameData);
-      }
+  @SubscribeMessage('login')
+  handleEvent(@MessageBody() player: Player): InfoServer {
+    const isConnected = this.players.find(
+      (player) => player.player_id === player.player_id,
+    );
+    if (isConnected === undefined) {
+      this.players.push(player);
+      const infoServer = new InfoServer(
+        true,
+        'You have been logged succefully !',
+      );
+      return infoServer;
     } else {
-      return 'Pas assez de joueurs !';
+      return new InfoServer(false, 'Error, you have not the permission !');
     }
+  }
+
+  handleDisconnect(player: Player) {
+    this.players = this.players.filter(
+      (pl) => pl.player_id === player.player_id,
+    );
+    if (this.matchmaking_players.includes(player))
+      this.matchmaking_players = this.matchmaking_players.filter(
+        (pl) => pl.player_id === player.player_id,
+      );
+  }
+
+  @SubscribeMessage('matchmaking')
+  async joining_game(@MessageBody() player: Player) {
+    if (!this.matchmaking_players.includes(player)) return;
+    this.matchmaking_players.push(player);
   }
 }

@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToOne,
@@ -11,14 +12,15 @@ import { ResultGame } from './ResultGame.entity';
 
 @Entity()
 export class Game {
-  @PrimaryGeneratedColumn()
-  game_id: number;
+  @PrimaryGeneratedColumn('uuid')
+  game_id: string;
 
   @ManyToMany(() => Player)
   @JoinTable()
   players: Player[];
 
   @OneToOne(() => ResultGame)
+  @JoinColumn()
   result: ResultGame;
 
   @Column()

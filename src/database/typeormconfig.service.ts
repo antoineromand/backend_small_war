@@ -9,11 +9,11 @@ export class TypeormConfigService implements TypeOrmOptionsFactory {
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
       type: 'mysql',
-      host: process.env.SW_HOST_PROD,
+      host: process.env.SW_HOST_DEV,
       port: parseInt(process.env.SW_PORT),
-      username: process.env.SW_ADMIN_PROD,
-      password: process.env.SW_PASSWORD_PROD,
-      database: process.env.SW_DATABASE_PROD,
+      username: process.env.SW_ADMIN_DEV,
+      password: process.env.SW_PASSWORD_DEV,
+      database: process.env.SW_DATABASE_DEV,
       entities: ['dist/**/*.entity.js'],
       synchronize: true,
     };

@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Player } from 'src/Model/Player.entity';
 import { PlayerStatistic } from 'src/Model/PlayerStatistic.entity';
-import { ObjectLiteral, Repository } from 'typeorm';
+import { InsertResult, ObjectLiteral, Repository } from 'typeorm';
 import { RegisterDTO } from './dto/Register.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -56,7 +56,7 @@ export class PlayerService {
     }
   }
 
-  async initStats() {
+  async initStats(): Promise<InsertResult> {
     return await this.playerStatisticsRepository
       .createQueryBuilder()
       .insert()
@@ -68,12 +68,13 @@ export class PlayerService {
   async getPlayerInfo(id: string): Promise<Player> {
     const user = await this.playerRepository.findOne({
       where: { player_id: id },
+      relations: ['statistic'],
     });
     user.password = undefined;
     return user;
   }
 
-  async updatePlayerUsername(id: string, username: string) {
+  async updatePlayerUsername(id: string, username: string): Promise<Player> {
     const findUsername = await this.playerRepository.findOne({
       where: { username: username },
     });
@@ -89,11 +90,10 @@ export class PlayerService {
     }
     const oldUsername = user.username;
     user.username = username;
-    this.playerRepository.save(user);
-    return `Le joueur ${oldUsername} a changé son pseudo avec le suivant : ${username}`;
+    return await this.playerRepository.save(user);
   }
 
-  async updateUserPassword(id: string, password: string) {
+  async updateUserPassword(id: string, password: string): Promise<Player> {
     const user = await this.getPlayerInfo(id);
     if (user.password === password) {
       throw new HttpException(
@@ -102,7 +102,7 @@ export class PlayerService {
       );
     }
     user.password = await bcrypt.hash(password, 10);
-    this.playerRepository.save(user);
-    return `Le joueur ${user.username} a changé son mot de passe !`;
+    
+    return await this.playerRepository.save(user);
   }
 }
